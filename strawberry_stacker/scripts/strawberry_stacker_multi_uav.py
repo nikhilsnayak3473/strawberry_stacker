@@ -163,7 +163,7 @@ class MultiDrone:
         self.edrone_rows = edrone_rows
         self.home_pose = [self.state_monitor.pose.pose.position.x,
                           self.state_monitor.pose.pose.position.y, 0.5]
-        self.box_pose = 0
+        self.box_pose_x = 0
         self.blue_box = 2
         self.red_box = 1
         self.boxid = 0
@@ -265,7 +265,7 @@ class MultiDrone:
         except:
             cx = 0
         if cx >= 190 and cx <= 200:  # checks whether the aruco marker center is in the range of the center of the image frame
-            self.box_pose = self.state_monitor.pose.pose.position.x
+            self.box_pose_x = self.state_monitor.pose.pose.position.x
             self.boxid = int(list(Detected_ArUco_markers.keys())[0])
             self.box_detected = True
             return True
@@ -284,9 +284,9 @@ class MultiDrone:
                 # Repositioning algorithms bychance if the gripper is not in the range
                 if time_out > 200:
                     self.adjust_position(
-                        [self.box_pose, self.edrone_rows[self.box_count_picked][1], 2], True)
+                        [self.box_pose_x, self.edrone_rows[self.box_count_picked][1], 2], True)
                     self.adjust_position(
-                        [self.box_pose, self.edrone_rows[self.box_count_picked][1], 0.1], False)
+                        [self.box_pose_x, self.edrone_rows[self.box_count_picked][1], 0.1], False)
                     self.set_mode('AUTO.LAND')
                     time_out = 0
                 self.rate.sleep()
