@@ -31,7 +31,7 @@ class DroneStateController:
                 f'/{self.drone}/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
             arm_service(arg)
         except rospy.ServiceException as e:
-            print("Service arming call failed: %s" % e)
+            print(f"Service arming call failed: {e}")
 
     def set_mode(self, mode: str):
         """Changes the mode of Drone.
@@ -44,7 +44,7 @@ class DroneStateController:
                 f'/{self.drone}/mavros/set_mode', mavros_msgs.srv.SetMode)
             modeService(custom_mode=mode)
         except rospy.ServiceException as e:
-            print("Service set mode call failed: %s" % e)
+            print(f"Service set mode call failed: {e}")
 
 
 class GripperStateController:
@@ -63,10 +63,9 @@ class GripperStateController:
         try:
             gripper_service = rospy.ServiceProxy(
                 f'/{self.drone}/activate_gripper', Gripper)
-            gripper_status = gripper_service(arg)
-            return gripper_status
+            return gripper_service(arg)
         except rospy.ServiceException as e:
-            print("Service set mode call failed: %s" % e)
+            print(f"Service set mode call failed: {e}")
 
     def check_range(self, status):
         """CallBack function for gripper_check topic"""
@@ -219,7 +218,7 @@ class MultiDrone:
             print(f"{self.drone}:Disarmed!!")
 
     def set_mode(self, mode):
-        while not self.state_monitor.state.mode == mode:
+        while self.state_monitor.state.mode != mode:
             self.drone_controller.set_mode(mode)
             self.rate.sleep()
         print(f"{self.drone}:{mode} mode activated")
@@ -229,7 +228,7 @@ class MultiDrone:
         self.pose.pose.position.x = 0
         self.pose.pose.position.y = 0
         self.pose.pose.position.z = 0
-        for i in range(100):
+        for _ in range(100):
             self.local_pose_publisher.publish(self.pose)
             self.rate.sleep()
         self.set_mode('OFFBOARD')

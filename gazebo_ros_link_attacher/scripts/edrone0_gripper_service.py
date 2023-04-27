@@ -18,7 +18,7 @@ class edrone_gripper():
         self._attach_srv_d = rospy.ServiceProxy('/link_attacher_node/detach', Attach)
         self._attach_srv_d.wait_for_service()
         self.model_state_msg = ModelStates()
-        self.box_model_name_list = ["box_"+str(i) for i in range(45)]
+        self.box_model_name_list = [f"box_{str(i)}" for i in range(45)]
         self.drone_model_name = 'edrone0'
         rospy.Subscriber('/gazebo/model_states_throttle', ModelStates, self.model_state_callback)
         self.check_pub = rospy.Publisher('/edrone0/gripper_check', String, queue_size=1)
@@ -35,8 +35,14 @@ class edrone_gripper():
 
     def callback_service_on_request(self, req):
         pickable, box_name = self.check()
-        rospy.loginfo('\033[94m' + " >>> Gripper Activate: {}".format(req.activate_gripper) + '\033[0m')
-        rospy.loginfo('\033[94m' + " >>> Gripper Flag Pickable: {}".format(str(pickable)) + '\033[0m')
+        rospy.loginfo(
+            '\033[94m'
+            + f" >>> Gripper Activate: {req.activate_gripper}"
+            + '\033[0m'
+        )
+        rospy.loginfo(
+            '\033[94m' + f" >>> Gripper Flag Pickable: {str(pickable)}" + '\033[0m'
+        )
         if pickable:
             if(req.activate_gripper is True):
                 self.activate_gripper(box_name)
@@ -84,11 +90,14 @@ class edrone_gripper():
                     bx_2 = self.model_state_msg.pose[box_index].position.z
                 except Exception as err:
                     box_index = -1
-                if(box_index != -1):
-                    if(abs(dr_0 - bx_0) < 0.15 and abs(dr_1 - bx_1) < 0.2 and 0 < dr_2 - bx_2 < 0.25):
-                        pickable = True
-                        box_name = box_model_name
-                        break
+                if (box_index != -1) and (
+                    abs(dr_0 - bx_0) < 0.15
+                    and abs(dr_1 - bx_1) < 0.2
+                    and 0 < dr_2 - bx_2 < 0.25
+                ):
+                    pickable = True
+                    box_name = box_model_name
+                    break
         return pickable, box_name
 
     def publish_check(self, pickable_flag):
